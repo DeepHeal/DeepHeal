@@ -1,0 +1,6 @@
+03:42:55-deepheal.deepheal-INFO-init_model: Model initialized on cpu. Params: 8006
+03:42:57-deepheal.deepheal-INFO-train: Epoch 1/2
+03:42:57-deepheal.deepheal-INFO-_run_epoch: Epoch   0 | Train Loss: 3.59, MSE: 0.00, CLASS: 0.00, CONTRAST: 3.59, IMPORTANCE: 0.00
+03:42:57-deepheal.deepheal-INFO-train: Epoch 2/2
+03:42:57-deepheal.deepheal-INFO-_run_epoch: Epoch   1 | Train Loss: 3.31, MSE: 0.00, CLASS: 0.00, CONTRAST: 3.31, IMPORTANCE: 0.00
+03:42:57-deepheal.deepheal-INFO-save_model: Model saved to model.pt
