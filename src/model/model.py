@@ -3,11 +3,11 @@ import torch.nn as nn
 from .build_layer import get_normalization_layer, build_layers
 from .. import logger
 
-class ConcordModel(nn.Module):
+class DeepHealModel(nn.Module):
     """
     A contrastive learning model for domain-aware and covariate-aware latent representations.
 
-    This model consists of an encoder, decoder, and optional classifier head. 
+    This model consists of an encoder, decoder, and optional classifier head.
 
     Attributes:
         domain_embedding_dim (int): Dimensionality of domain embeddings.
@@ -20,18 +20,18 @@ class ConcordModel(nn.Module):
         classifier (nn.Sequential, optional): Classifier head.
         importance_mask (nn.Parameter, optional): Learnable importance mask.
     """
-    def __init__(self, input_dim, hidden_dim, num_domains, num_classes,  
-                 domain_embedding_dim=0, 
+    def __init__(self, input_dim, hidden_dim, num_domains, num_classes,
+                 domain_embedding_dim=0,
                  covariate_embedding_dims={},
                  covariate_num_categories={},
-                 encoder_dims=[], decoder_dims=[], 
-                 dropout_prob: float = 0.0, 
-                 norm_type='layer_norm', 
-                 #encoder_append_cov=False, 
+                 encoder_dims=[], decoder_dims=[],
+                 dropout_prob: float = 0.0,
+                 norm_type='layer_norm',
+                 #encoder_append_cov=False,
                  use_decoder=True, decoder_final_activation='leaky_relu',
                  use_classifier=False, use_importance_mask=False):
         """
-        Initializes the Concord model.
+        Initializes the DeepHeal model.
 
         Args:
             input_dim (int): Number of input features.
@@ -53,7 +53,7 @@ class ConcordModel(nn.Module):
         super().__init__()
 
         # Encoder
-        self.domain_embedding_dim = domain_embedding_dim 
+        self.domain_embedding_dim = domain_embedding_dim
         self.input_dim = input_dim
         self.use_classifier = use_classifier
         self.use_decoder = use_decoder
@@ -83,7 +83,7 @@ class ConcordModel(nn.Module):
             decoder_input_dim = hidden_dim + total_embedding_dim
             logger.info(f"Decoder input dim: {decoder_input_dim}")
         if self.use_classifier:
-            classifier_input_dim = hidden_dim # decoder_input_dim 
+            classifier_input_dim = hidden_dim # decoder_input_dim
             logger.info(f"Classifier input dim: {classifier_input_dim}")
 
         # Encoder
@@ -99,7 +99,7 @@ class ConcordModel(nn.Module):
         # Decoder
         if self.use_decoder:
             if decoder_dims:
-                self.decoder = build_layers(decoder_input_dim, input_dim, decoder_dims, dropout_prob, norm_type, 
+                self.decoder = build_layers(decoder_input_dim, input_dim, decoder_dims, dropout_prob, norm_type,
                                             final_layer_norm=False, final_layer_dropout=False, final_activation=decoder_final_activation)
             else:
                 self.decoder = nn.Sequential(
@@ -131,11 +131,11 @@ class ConcordModel(nn.Module):
             covariate_tensors (dict, optional): Dictionary of covariate labels.
 
         Returns:
-            dict: A dictionary with encoded representations, decoded outputs (if enabled), 
+            dict: A dictionary with encoded representations, decoded outputs (if enabled),
                   classifier predictions (if enabled), and latent activations (if requested).
         """
 
-        out = {}   
+        out = {}
 
         out['encoded'] = self.encode(x)
 
@@ -206,7 +206,7 @@ class ConcordModel(nn.Module):
             x = x * self.get_importance_weights()
 
         return self.encoder(x)
-    
+
 
     def get_embeddings(self, domain_labels=None, covariate_tensors=None):
         """
@@ -232,6 +232,3 @@ class ConcordModel(nn.Module):
         if embeddings:
             return embeddings
         return None
-
-
-    
