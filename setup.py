@@ -20,8 +20,8 @@ setup(
     # Manually specify packages to map 'src' to 'deepheal'
     packages=["deepheal", "deepheal.model", "deepheal.utils"],
     package_dir={"deepheal": "src"},
-    author='Qin Zhu',
-    author_email='qin.zhu@ucsf.edu',
+    author='Disheng Feng',
+    author_email='fengds@fjtcm.edu.cn',
     url='https://github.com/DeepHeal/DeepHeal',
     license="MIT",
     install_requires=[
