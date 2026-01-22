@@ -1,8 +1,3 @@
-这是一份经过排版优化、可以直接保存为 `README.md` 的文件内容。你可以直接点击代码块右上角的“Copy”按钮，然后粘贴到你的项目中。
-
-Markdown
-
-```
 # DeepHeal: Self-supervised representations of drug-response proteomics
 
 **DeepHeal** learns low-dimensional, denoised representations of **drug-induced proteomic changes** and exports them as CSV files for downstream machine learning models (e.g., **GLMVQ**, **LightGBM**).
