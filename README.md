@@ -13,9 +13,107 @@ Internally, DeepHeal implements a minimalist neural network with a single hidden
 
 ---
 
-## 1. Data Format
+## 1. Tutorial
 
-### 1.1 Proteomics log2FC matrix
+You can try DeepHeal directly in your browser using Google Colab. The tutorial covers synthetic data generation, model training, embedding extraction, and visualization.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DeepHeal/DeepHeal/blob/main/tutorial.ipynb)
+
+**Tutorial Content:**
+- Generating synthetic proteomics data.
+- Initializing and training the DeepHeal model.
+- Extracting latent embeddings.
+- Visualizing embeddings with PCA.
+
+---
+
+## 2. Installation
+
+### 2.1 Clone the repository
+
+```bash
+git clone https://github.com/DeepHeal/DeepHeal.git
+cd DeepHeal
+```
+
+### 2.2 Install dependencies
+
+It is recommended to use a virtual environment.
+
+```bash
+pip install -r requirements.txt
+```
+
+*DeepHeal is implemented in Python and requires PyTorch.*
+
+---
+
+## 3. Usage
+
+### 3.1 Command Line Interface (CLI)
+
+You can use the provided `trainer.py` script to train the model and generate embeddings from CSV files.
+
+**Basic Usage:**
+
+```bash
+python trainer.py \
+  --input data/proteomics_log2fc.csv \
+  --id-col Sample_ID \
+  --latent-dim 32 \
+  --output embeddings/deepheal_latent_32d.csv \
+  --no-batch
+```
+
+**Arguments:**
+
+- `--input`: Path to the input CSV file containing log2 fold-changes.
+- `--id-col`: Name of the column containing sample identifiers (e.g., `Sample_ID`).
+- `--meta`: (Optional) Path to a metadata CSV file.
+- `--latent-dim`: Size of the latent dimension (default: 32).
+- `--output`: Path where the output embeddings CSV will be saved.
+- `--no-batch`: Disables batch correction logic (recommended for simple dimensionality reduction).
+- `--epochs`: Number of training epochs (default: 15).
+- `--batch-size`: Batch size (default: 32).
+- `--lr`: Learning rate (default: 1e-3).
+
+### 3.2 Python API
+
+You can also use DeepHeal programmatically within your Python scripts.
+
+```python
+import pandas as pd
+from deepheal.deepheal import DeepHeal
+
+# 1. Load Data
+# Ensure your data is a DataFrame where rows are samples and columns are features
+# 'Sample_ID' column should be handled separately or as index
+df = pd.read_csv("data/proteomics_log2fc.csv")
+features = df.drop(columns=["Sample_ID"])  # Drop non-feature columns
+
+# 2. Initialize Model
+model = DeepHeal(
+    save_dir="output",
+    latent_dim=32,
+    n_epochs=20,
+    batch_size=32,
+    domain_key=None  # Set to None for no batch correction
+)
+
+# 3. Set Data & Train
+model.set_data(features)
+model.train(save_model=True)
+
+# 4. Generate Embeddings
+embeddings = model.predict(features)
+print(f"Embeddings shape: {embeddings.shape}")
+```
+
+---
+
+## 4. Data Format
+
+### 4.1 Proteomics log2FC matrix
 
 - **File**: e.g., `proteomics_log2fc.csv`
 - **Format**: CSV
@@ -38,7 +136,7 @@ DrugB,-0.95,0.20,-0.33,...
 - Values must be **log2-transformed fold-changes**.
 - `Sample_ID` must uniquely identify each sample (e.g., drug name or treatment ID).
 
-### 1.2 Meta file: drug classes
+### 4.2 Meta file: drug classes (Optional)
 
 - **File**: e.g., `meta.csv`
 - **Format**: CSV
@@ -48,123 +146,22 @@ DrugB,-0.95,0.20,-0.33,...
 
 **Example:**
 
-代码段
-
-```
+```csv
 Sample_ID,Drug_Class
 DrugA,Kinase_inhibitor
 DrugB,GPCR_antagonist
-DrugC,Proteasome_inhibitor
 ...
 ```
 
-**Notes:**
+---
 
-- `Drug_Class` is **not** used during DeepHeal training (self-supervised).
-- It is only used later to train classifiers such as GLMVQ and LightGBM.
-
-> **中文说明 (Chinese Note):**
->
-> - **数据文件**: `proteomics_log2fc.csv`，行为样本（药物处理），列为蛋白，数值为相对于对照的 log2FC。
-> - **元数据**: `meta.csv`，必须包含 `Sample_ID` (用于对齐) 和 `Drug_Class` (药效类别，用于后续分类)。
-
-------
-
-## 2. Installation
-
-Clone this repository:
-
-Bash
-
-```
-git clone [https://github.com/DeepHeal/DeepHeal.git](https://github.com/DeepHeal/DeepHeal.git)
-cd DeepHeal
-```
-
-Install dependencies (adjust to your environment):
-
-Bash
-
-```
-pip install -r requirements.txt
-```
-
-*DeepHeal is implemented in Python (PyTorch or equivalent deep learning framework; see `requirements.txt` for details).*
-
-------
-
-## 3. Usage
-
-### 3.1 Prepare data
-
-Place your input files in a data directory, for example:
-
-Plaintext
-
-```
-data/
-  proteomics_log2fc.csv   # log2FC matrix
-  meta.csv                # Sample_ID + Drug_Class
-```
-
-**Make sure:**
-
-- `proteomics_log2fc.csv` contains a `Sample_ID` column.
-- `meta.csv` has matching `Sample_ID` values.
-
-### 3.2 Train DeepHeal and generate embeddings
-
-Run the main training script (e.g., `train_deepheal.py`) to generate the embeddings.
-
-Bash
-
-```
-python trainer.py \
-  --input data/proteomics_log2fc.csv \
-  --id-col Sample_ID \
-  --latent-dim 32 \
-  --output embeddings/deepheal_latent_32d.csv \
-  --no-batch
-```
-
-**Arguments:**
-
-- `--input`: Path to the log2FC matrix CSV.
-- `--id-col`: Name of the sample ID column (e.g., `Sample_ID`).
-- `--latent-dim`: Dimensionality of the latent space (e.g., 16, 32, 64).
-- `--output`: Output path for the embedding CSV.
-- `--no-batch` (or equivalent flag): Disables batch-integration logic; DeepHeal is used purely for **dimensionality reduction** on a single integrated dataset.
-
-### 3.3 Output format
-
-DeepHeal produces a CSV file containing the low-dimensional embeddings.
-
-**File:** `embeddings/deepheal_latent_32d.csv`
-
-**Example Content:**
-
-代码段
-
-```
-Sample_ID,z1,z2,z3,...,z32
-DrugA,0.12,-0.08,0.33,...,1.05
-DrugB,-0.27,0.44,-0.10,...,-0.92
-...
-```
-
-The columns `z1, z2, ..., zK` are the learned feature representations per sample.
-
-------
-
-## 4. Downstream Classification (GLMVQ / LightGBM)
+## 5. Downstream Classification (GLMVQ / LightGBM)
 
 DeepHeal itself does **not** train supervised classifiers. You must export the embeddings and build your own models.
 
 Below is a minimal Python example using **LightGBM**:
 
-Python
-
-```
+```python
 import pandas as pd
 import lightgbm as lgb
 from sklearn.model_selection import train_test_split
@@ -217,11 +214,9 @@ y_pred_labels = y_pred.argmax(axis=1)
 print(classification_report(y_test, y_pred_labels))
 ```
 
-*For **GLMVQ**, follow the API of your chosen implementation (e.g., `sklearn-lvq`) and feed `X` as features and `y` as labels.*
+---
 
-------
-
-## 5. Method Summary
+## 6. Method Summary
 
 **DeepHeal Framework:**
 
@@ -237,8 +232,8 @@ print(classification_report(y_test, y_pred_labels))
 - We **do not** model or correct batch effects.
 - We focus on using DeepHeal as a **general-purpose dimensionality reduction** tool for drug-response proteomics, preparing robust features for downstream machine learning.
 
-------
+---
 
-## 6. License
+## 7. License
 
 MIT License
