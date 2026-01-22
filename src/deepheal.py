@@ -8,7 +8,7 @@ import json
 import torch.nn as nn
 import logging
 
-from .model.model import ConcordModel
+from .model.model import DeepHealModel
 from .model.dataloader import DataLoaderManager
 from .model.trainer import Trainer
 from .model.augment import MaskNonZerosAugment, FeatureDropAugment
@@ -172,7 +172,7 @@ class DeepHeal:
         if self.config.input_dim is None:
              raise ValueError("Input dimension unknown. Call set_data() first.")
 
-        self.model = ConcordModel(
+        self.model = DeepHealModel(
             input_dim=self.config.input_dim,
             hidden_dim=self.config.latent_dim,
             num_domains=self.config.num_domains,
