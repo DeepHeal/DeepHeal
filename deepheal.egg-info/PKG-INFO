@@ -3,8 +3,8 @@ Name: deepheal
 Version: 1.0.12
 Summary: DeepHeal: Self-supervised representations of drug-response proteomics
 Home-page: https://github.com/DeepHeal/DeepHeal
-Author: Qin Zhu
-Author-email: qin.zhu@ucsf.edu
+Author: Disheng Feng
+Author-email: fengds@fjtcm.edu.cn
 License: MIT
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
